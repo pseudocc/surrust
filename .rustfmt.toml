@@ -1,0 +1,5 @@
+edition = "2021"
+max_width = 84
+hard_tabs = true
+reorder_imports = true
+reorder_modules = true

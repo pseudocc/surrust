@@ -1,0 +1,17 @@
+[package]
+name = "surrust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+surrealdb = "1.0.0-beta.8"
+indoc = "1.0"
+tokio = { version = "1.24.2", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+async-trait = "0.1"
+log = { version = "0.4" }
+env_logger = "0.10"
+nameof = "1.2"
