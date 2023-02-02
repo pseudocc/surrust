@@ -4,7 +4,9 @@ use log::{info, log_enabled, trace};
 use nameof::name_of;
 use service::ServiceModel;
 use std::collections::BTreeMap as Map;
-use surrealdb::{sql, Datastore, Error, Session};
+use surrealdb::{sql, kvs::Datastore, dbs::Session};
+
+pub(crate) type DbResult<T> = Result<T, surrealdb::Error>;
 
 pub(in crate::db) struct DbInitObject {
 	thing: sql::Thing,
@@ -37,7 +39,7 @@ impl DbInitObject {
 	pub async fn new(
 		store: &Datastore,
 		session: &Session,
-	) -> Result<DbInitObject, Error> {
+	) -> DbResult<DbInitObject> {
 		let thing = sql::Thing {
 			tb: Self::TABLE.to_string(),
 			id: sql::Id::String(Self::IDENT.to_string()),
@@ -82,7 +84,7 @@ impl DbInstance {
 	pub const NAMESPACE: &str = "surrust";
 	pub const DATABASE: &str = "develop";
 
-	pub async fn new(path: &String) -> Result<DbInstance, surrealdb::Error> {
+	pub async fn new(path: &String) -> DbResult<DbInstance> {
 		let store = Datastore::new(path.as_str()).await?;
 		let session = Session::for_db(Self::NAMESPACE, Self::DATABASE);
 		let init_obj = DbInitObject::new(&store, &session).await?;
