@@ -6,6 +6,8 @@ use service::ServiceModel;
 use std::collections::BTreeMap as Map;
 use surrealdb::{sql, kvs::Datastore, dbs::Session};
 
+use crate::surrust::{self, DbKind};
+
 pub(crate) type DbResult<T> = Result<T, surrealdb::Error>;
 
 pub(in crate::db) struct DbInitObject {
@@ -81,12 +83,14 @@ impl DbInitObject {
 }
 
 impl DbInstance {
-	pub const NAMESPACE: &str = "surrust";
-	pub const DATABASE: &str = "develop";
-
-	pub async fn new(path: &String) -> DbResult<DbInstance> {
-		let store = Datastore::new(path.as_str()).await?;
-		let session = Session::for_db(Self::NAMESPACE, Self::DATABASE);
+	pub async fn new(db: &surrust::DbSettings) -> DbResult<DbInstance> {
+		let store = if let DbKind::File(db_path) = &db.kind {
+			let file_path = format!("file://{}", db_path.to_string_lossy());
+			Datastore::new(file_path.as_str()).await?
+		} else {
+			Datastore::new("memory").await?
+		};
+		let session = Session::for_db(db.namespace(), db.database());
 		let init_obj = DbInitObject::new(&store, &session).await?;
 
 		let service = ServiceModel::new();
